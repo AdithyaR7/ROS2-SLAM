@@ -69,7 +69,7 @@ def generate_launch_description():
             # arguments=['-topic', '/robot_description', '-entity', 'my_robot', 
             #           '-x', '-2.0', '-y', '1.0', '-z', '0.1'],
             arguments=['-topic', '/robot_description', '-entity', 'autonomous_vehicle',
-                      '-x', '-2.0', '-y', '1.0', '-z', '0.1', '-Y', '3.14159'],
+                      '-x', '-2.0', '-y', '1.0', '-z', '0.1'],
             parameters=[{'start_delay': 2.0}]  # Wait 2 seconds
         )
     ])

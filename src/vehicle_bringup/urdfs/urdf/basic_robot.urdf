@@ -124,7 +124,7 @@
     <parent link="base_link"/>
     <child link="left_wheel"/>
     <origin xyz="-0.1 -0.175 0.0" rpy="1.5708 0.0 0.0"/>
-    <axis xyz="0 0 1"/>
+    <axis xyz="0 0 -1"/>
   </joint>
 
   <!-- Right Wheel Joint -->
@@ -132,7 +132,7 @@
     <parent link="base_link"/>
     <child link="right_wheel"/>
     <origin xyz="-0.1 0.175 0.0" rpy="1.5708 0.0 0.0"/>
-    <axis xyz="0 0 1"/>
+    <axis xyz="0 0 -1"/>
   </joint>
 
   <!-- Caster Wheel Joint (fixed to base) -->
@@ -155,7 +155,7 @@
       <update_rate>100.0</update_rate>
       <left_joint>left_wheel_joint</left_joint>
       <right_joint>right_wheel_joint</right_joint>
-      <wheel_separation>0.35</wheel_separation>
+      <wheel_separation>-0.35</wheel_separation>
       <wheel_diameter>0.2</wheel_diameter>
       <max_wheel_torque>20</max_wheel_torque>
       <max_wheel_acceleration>1.0</max_wheel_acceleration>
