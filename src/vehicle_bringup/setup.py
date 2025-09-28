@@ -1,5 +1,5 @@
 from setuptools import find_packages, setup
-import glob
+from glob import glob
 
 package_name = 'vehicle_bringup'
 
@@ -11,11 +11,12 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        ('share/' + package_name + '/launch', glob.glob('launch/*.launch.*')),
-        ('share/' + package_name + '/urdfs/urdf', glob.glob('urdfs/urdf/*')),
-        ('share/' + package_name + '/urdfs/worlds', glob.glob('urdfs/worlds/*')),
-        ('share/' + package_name + '/urdfs/models/brick_box_wall', glob.glob('urdfs/models/brick_box_wall/*')),
-        ('share/' + package_name + '/urdfs/models/brick_box_wall2', glob.glob('urdfs/models/brick_box_wall2/*')),
+        ('share/' + package_name + '/launch', glob('launch/*.launch.*')),
+        ('share/' + package_name + '/urdfs/urdf', glob('urdfs/urdf/*')),
+        ('share/' + package_name + '/urdfs/worlds', glob('urdfs/worlds/*')),
+        ('share/' + package_name + '/urdfs/models/brick_box_wall', glob('urdfs/models/brick_box_wall/*')),
+        ('share/' + package_name + '/urdfs/models/brick_box_wall2', glob('urdfs/models/brick_box_wall2/*')),
+        ('share/' + package_name + '/config', glob('config/*.yaml')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
