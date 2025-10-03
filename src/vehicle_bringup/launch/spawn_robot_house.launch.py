@@ -11,7 +11,8 @@ def generate_launch_description():
         get_package_share_directory('vehicle_bringup'),
         'urdfs',
         'urdf',
-        'basic_robot.urdf'
+        # 'basic_robot.urdf'    # robot with lidar only
+        'robot_rgbd.urdf'       # robot with lidar + rgb-d realsense camera
     )
     
     # Read URDF content
