@@ -11,7 +11,8 @@ def generate_launch_description():
         get_package_share_directory('vehicle_bringup'),
         'urdfs',
         'urdf',
-        'basic_robot.urdf'
+        'basic_robot.urdf'    # robot with lidar only
+        # 'robot_rgbd.urdf'       # robot with lidar + rgb-d realsense camera
     )
     
     # Read URDF content
@@ -69,7 +70,7 @@ def generate_launch_description():
             # arguments=['-topic', '/robot_description', '-entity', 'my_robot', 
             #           '-x', '-2.0', '-y', '1.0', '-z', '0.1'],
             arguments=['-topic', '/robot_description', '-entity', 'autonomous_vehicle',
-                      '-x', '-2.0', '-y', '1.0', '-z', '0.1'],
+                      '-x', '-4.0', '-y', '1.0', '-z', '0.1'],
             parameters=[{'start_delay': 2.0}]  # Wait 2 seconds
         )
     ])

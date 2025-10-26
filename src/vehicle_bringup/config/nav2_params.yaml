@@ -46,7 +46,7 @@ bt_navigator:
     odom_topic: /odom
     bt_loop_duration: 10
     # default_server_timeout: 20
-    default_server_timeout: 240
+    default_server_timeout: 120
     wait_for_service_timeout: 1000
     action_server_result_timeout: 900.0
     navigators: ["navigate_to_pose", "navigate_through_poses"]
@@ -143,7 +143,7 @@ controller_server:
       plugin: "nav2_controller::SimpleGoalChecker"
       # xy_goal_tolerance: 0.25
       # yaw_goal_tolerance: 0.25
-      xy_goal_tolerance: 0.25
+      xy_goal_tolerance: 0.40
       yaw_goal_tolerance: 0.25
     # DWB parameters
     FollowPath:
@@ -199,7 +199,7 @@ local_costmap:
       width: 3
       height: 3
       resolution: 0.05
-      robot_radius: 0.22
+      robot_radius: 0.15
       plugins: ["voxel_layer", "inflation_layer"]
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
@@ -223,7 +223,7 @@ local_costmap:
           data_type: "LaserScan"
           raytrace_max_range: 3.0
           raytrace_min_range: 0.0
-          obstacle_max_range: 2.0   # MODIFIED
+          obstacle_max_range: 2.5   # MODIFIED
           obstacle_min_range: 0.0
       static_layer:
         plugin: "nav2_costmap_2d::StaticLayer"
@@ -238,7 +238,7 @@ global_costmap:
       publish_frequency: 1.0
       global_frame: map
       robot_base_frame: base_link
-      robot_radius: 0.22      # MODIFIED
+      robot_radius: 0.15      # MODIFIED
       resolution: 0.05
       track_unknown_space: true
       plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
@@ -254,7 +254,7 @@ global_costmap:
           data_type: "LaserScan"
           raytrace_max_range: 3.0
           raytrace_min_range: 0.0
-          obstacle_max_range: 2.0   # MODIFIED
+          obstacle_max_range: 2.5   # MODIFIED
           obstacle_min_range: 0.0
       static_layer:
         plugin: "nav2_costmap_2d::StaticLayer"
@@ -285,7 +285,7 @@ planner_server:
     planner_plugins: ["GridBased"]
     GridBased:
       plugin: "nav2_navfn_planner/NavfnPlanner"
-      tolerance: 0.5    # Modified
+      tolerance: 0.3    # Modified
       use_astar: true   # MODIFIED
       allow_unknown: true
 

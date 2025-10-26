@@ -1,0 +1,21 @@
+<launch>
+   
+    <!-- Gazebo and Robot urdf - spawn robot and world env in Gazebo-->
+    <include file="$(find-pkg-share vehicle_bringup)/launch/spawn_robot_rgbd_house.launch.py"/>
+    
+    <!-- SLAM Toolbox - create occupancy map-->
+    <node pkg="slam_toolbox" exec="async_slam_toolbox_node" name="slam_toolbox">
+        <param from="$(find-pkg-share vehicle_bringup)/config/slam_toolbox_params.yaml"/>
+    </node>
+
+    <!-- Nav2 Bringup - control the robot-->
+    <include file="$(find-pkg-share nav2_bringup)/launch/navigation_launch.py">
+        <arg name="use_sim_time" value="true"/>
+        <arg name="params_file" value="$(find-pkg-share vehicle_bringup)/config/nav2_params.yaml"/>
+    </include>
+
+    <!-- Detection Node - runs YOLO object detection-->
+    <node pkg="vision_pkg" exec="detection_node" name="detection_node" output="screen"/>
+
+</launch>
+

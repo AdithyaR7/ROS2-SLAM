@@ -1,0 +1,2 @@
+ultralytics               # for YOLO
+# install torch with cuda support
