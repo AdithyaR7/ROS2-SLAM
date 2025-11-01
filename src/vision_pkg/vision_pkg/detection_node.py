@@ -47,7 +47,7 @@ class DetectionNode(Node):
         self.tf_listener = TransformListener(self.tf_buffer, self) 
 
         # YOLO - Object Detection. Should use GPY by default
-        self.model = YOLO('yolov10s.pt')                      # Load model once 
+        self.model = YOLO('yolov10m.pt')                      # Load model once 
         self.model.overrides['verbose'] = False               # Disable YOLO logging
         self.model(np.zeros((640, 480, 3), dtype=np.uint8))   # Warm-up inference
         device = next(self.model.model.parameters()).device

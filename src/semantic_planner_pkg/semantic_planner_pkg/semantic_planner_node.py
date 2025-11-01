@@ -4,6 +4,9 @@ import rclpy
 from rclpy.node import Node
 from vehicle_interfaces.msg import DetectionArray, SemanticObject
 from visualization_msgs.msg import Marker, MarkerArray
+from std_msgs.msg import String
+from geometry_msgs.msg import PoseStamped
+from tf2_ros import Buffer, TransformListener
 import math
 
 class SemanticPlannerNode(Node):
@@ -12,18 +15,25 @@ class SemanticPlannerNode(Node):
 
         self.detection_array_sub_ = self.create_subscription(
             DetectionArray, "/detection_array", self.callback_detection_array, 10)
+        self.navigation_command_sub_ = self.create_subscription(
+            String, "/navigation_command", self.callback_navigation_command, 10)
 
         self.semantic_map_pub_ = self.create_publisher(MarkerArray, "semantic_map", 10)
+        self.goal_pose_pub_ = self.create_publisher(PoseStamped, "/goal_pose", 10)
 
         # Semantic map: list of SemanticObject
         self.semantic_map = []
 
+        # TF2 for getting robot position
+        self.tf_buffer = Buffer()
+        self.tf_listener = TransformListener(self.tf_buffer, self)
+
         # Distance threshold for considering objects as duplicates (in meters)
-        self.declare_parameter('duplicate_distance_threshold', 0.5)
+        self.declare_parameter('duplicate_distance_threshold', 1.0)
         self.duplicate_threshold = self.get_parameter('duplicate_distance_threshold').value
 
         # Minimum confidence threshold to add detection to semantic map
-        self.declare_parameter('min_confidence_threshold', 0.1)
+        self.declare_parameter('min_confidence_threshold', 0.7)
         self.min_confidence = self.get_parameter('min_confidence_threshold').value
 
         self.get_logger().info(f"Semantic Planner Node started with duplicate threshold: {self.duplicate_threshold}m, min confidence: {self.min_confidence}")
@@ -90,6 +100,9 @@ class SemanticPlannerNode(Node):
             marker.type = Marker.SPHERE
             marker.action = Marker.ADD
             marker.pose.position = obj.position
+            marker.pose.orientation.x = 0.0
+            marker.pose.orientation.y = 0.0
+            marker.pose.orientation.z = 0.0
             marker.pose.orientation.w = 1.0
             marker.scale.x = 0.3
             marker.scale.y = 0.3
@@ -111,6 +124,9 @@ class SemanticPlannerNode(Node):
             text_marker.pose.position.x = obj.position.x
             text_marker.pose.position.y = obj.position.y
             text_marker.pose.position.z = obj.position.z + 0.4
+            text_marker.pose.orientation.x = 0.0
+            text_marker.pose.orientation.y = 0.0
+            text_marker.pose.orientation.z = 0.0
             text_marker.pose.orientation.w = 1.0
             text_marker.scale.z = 0.2
             text_marker.color.r = 1.0
@@ -131,6 +147,74 @@ class SemanticPlannerNode(Node):
         """Process incoming detection array and update semantic map"""
         self.update_semantic_map(msg)
         self.publish_semantic_map()
+
+    def get_robot_position(self):
+        """Get current robot position in map frame"""
+        try:
+            transform = self.tf_buffer.lookup_transform(
+                "map",
+                "base_link",
+                rclpy.time.Time(),
+                timeout=rclpy.duration.Duration(seconds=0.1)
+            )
+            return transform.transform.translation
+        except Exception as e:
+            self.get_logger().warn(f"Failed to get robot position: {e}", throttle_duration_sec=5.0)
+            return None
+
+    def find_closest_object_in_map(self, target_name):
+        """Find closest object in semantic map by name (case-insensitive partial match)"""
+        target_name = target_name.lower().strip()
+        robot_pos = self.get_robot_position()
+
+        if robot_pos is None:
+            self.get_logger().warn("Cannot find closest object without robot position")
+            return None
+
+        closest_obj = None
+        min_distance = float('inf')
+
+        for obj in self.semantic_map:
+            if target_name in obj.class_name.lower():
+                distance = self.calculate_distance(robot_pos, obj.position)
+                if distance < min_distance:
+                    min_distance = distance
+                    closest_obj = obj
+
+        return closest_obj
+
+    def navigate_to_object(self, target_name):
+        """Send navigation goal to closest matching object location"""
+        obj = self.find_closest_object_in_map(target_name)
+
+        if obj is None:
+            self.get_logger().warn(f"Object '{target_name}' not found in semantic map")
+            return
+
+        # Create goal pose
+        goal_pose = PoseStamped()
+        goal_pose.header.frame_id = "map"
+        goal_pose.header.stamp = self.get_clock().now().to_msg()
+        goal_pose.pose.position = obj.position
+        goal_pose.pose.orientation.x = 0.0
+        goal_pose.pose.orientation.y = 0.0
+        goal_pose.pose.orientation.z = 0.0
+        goal_pose.pose.orientation.w = 1.0
+
+        self.goal_pose_pub_.publish(goal_pose)
+        self.get_logger().info(
+            f"Navigating to {obj.class_name} at ({obj.position.x:.2f}, {obj.position.y:.2f}, {obj.position.z:.2f})"
+        )
+
+    def callback_navigation_command(self, msg: String):
+        """Process navigation commands like 'go to chair'"""
+        cmd = msg.data.lower().strip()
+
+        if "go to" in cmd:
+            target = cmd.replace("go to", "").strip()
+            self.navigate_to_object(target)
+        else:
+            self.get_logger().warn(f"Unknown command format: '{msg.data}'")
 
 def main(args=None):
     rclpy.init(args=args)
