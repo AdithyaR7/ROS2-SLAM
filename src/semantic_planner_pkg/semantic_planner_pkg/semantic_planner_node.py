@@ -19,11 +19,11 @@ class SemanticPlannerNode(Node):
         self.semantic_map = []
 
         # Distance threshold for considering objects as duplicates (in meters)
-        self.declare_parameter('duplicate_distance_threshold', 0.5)
+        self.declare_parameter('duplicate_distance_threshold', 1.0)
         self.duplicate_threshold = self.get_parameter('duplicate_distance_threshold').value
 
         # Minimum confidence threshold to add detection to semantic map
-        self.declare_parameter('min_confidence_threshold', 0.1)
+        self.declare_parameter('min_confidence_threshold', 0.7)
         self.min_confidence = self.get_parameter('min_confidence_threshold').value
 
         self.get_logger().info(f"Semantic Planner Node started with duplicate threshold: {self.duplicate_threshold}m, min confidence: {self.min_confidence}")
@@ -90,6 +90,9 @@ class SemanticPlannerNode(Node):
             marker.type = Marker.SPHERE
             marker.action = Marker.ADD
             marker.pose.position = obj.position
+            marker.pose.orientation.x = 0.0
+            marker.pose.orientation.y = 0.0
+            marker.pose.orientation.z = 0.0
             marker.pose.orientation.w = 1.0
             marker.scale.x = 0.3
             marker.scale.y = 0.3
@@ -111,6 +114,9 @@ class SemanticPlannerNode(Node):
             text_marker.pose.position.x = obj.position.x
             text_marker.pose.position.y = obj.position.y
             text_marker.pose.position.z = obj.position.z + 0.4
+            text_marker.pose.orientation.x = 0.0
+            text_marker.pose.orientation.y = 0.0
+            text_marker.pose.orientation.z = 0.0
             text_marker.pose.orientation.w = 1.0
             text_marker.scale.z = 0.2
             text_marker.color.r = 1.0
