@@ -1,0 +1,7 @@
+semantic_planner_node:
+  ros__parameters:
+    # Distance threshold for considering objects as duplicates (meters)
+    duplicate_distance_threshold: 1.0
+
+    # Minimum confidence threshold to add detection to semantic map
+    min_confidence_threshold: 0.7

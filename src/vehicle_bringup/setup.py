@@ -16,7 +16,7 @@ setup(
         ('share/' + package_name + '/urdfs/worlds', glob('urdfs/worlds/*')),
         ('share/' + package_name + '/urdfs/models/brick_box_wall', glob('urdfs/models/brick_box_wall/*')),
         ('share/' + package_name + '/urdfs/models/brick_box_wall2', glob('urdfs/models/brick_box_wall2/*')),
-        ('share/' + package_name + '/config', glob('config/*.yaml')),
+        ('share/' + package_name + '/config', glob('config/*.yaml') + glob('config/*.rviz')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,

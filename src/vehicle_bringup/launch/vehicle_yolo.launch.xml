@@ -14,8 +14,17 @@
         <arg name="params_file" value="$(find-pkg-share vehicle_bringup)/config/nav2_params.yaml"/>
     </include>
 
-    <!-- Detection Node - runs YOLO object detection-->
+    <!-- Detection Node - runs YOLO object detection and publishes info for semantic map-->
     <node pkg="vision_pkg" exec="detection_node" name="detection_node" output="screen"/>
+
+    <!-- Semantic Planner Node - builds semantic map and handles navigation commands-->
+    <node pkg="semantic_planner_pkg" exec="semantic_planner_node" name="semantic_planner_node" output="screen">
+        <param from="$(find-pkg-share vehicle_bringup)/config/semantic_planner_params.yaml"/>
+    </node>
+
+    <!-- RViz -->
+    <node pkg="rviz2" exec="rviz2" name="rviz2" output="screen"
+          args="-d $(find-pkg-share vehicle_bringup)/config/slam_ros2_viz.rviz"/>
 
 </launch>
 
