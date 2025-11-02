@@ -253,6 +253,6 @@ ros2 run tf2_tools view_frames
 
 ## Acknowledgements
 - **Nav2** for ROS2 navigation framework
-- **slam_toolbox**
+- **slam_toolbox** for 2D LiDAR  SLAM framework
 - **m-explore-ros2** (robo-friends) for autonomous exploration
 - **Ultralytics** for YOLOv10 
