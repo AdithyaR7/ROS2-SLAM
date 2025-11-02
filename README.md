@@ -1,5 +1,6 @@
 # ROS2 SLAM with Object Detection and a Semantic Map 
 Autonomous robot navigation system that builds semantic maps by fusing 2D LiDAR SLAM with real-time object detection and depth sensing. 
+(pictures and video coming soon)
 
 ## Overview
 This project extends traditional geometric SLAM by adding a **semantic layer** - the robot doesn't just map walls and obstacles, it identifies and remembers objects like chairs, tables, and other items. Navigate using natural commands like "go to the chair" instead of coordinates, enabling more intuitive human-robot interaction.
@@ -18,9 +19,9 @@ During exploration, the robot simultaneously builds its geometric map while dete
 ## World & Robot
 **Robot Configuration:**
 - Differential drive base with caster wheel
-- 2D 360° LiDAR (Hokuyo simulation, 720 samples, 10m range) for SLAM
-- RealSense D435 depth camera (simulated, 640x480 RGB-D) for object perception
-- Compact indoor navigation platform
+- 2D 360° LiDAR (Hokuyo simulation) for SLAM
+- RealSense D435 depth camera (simulated, 640x480 RGB-D) for object detection and depth measurements
+- Compact indoor navigation platform - pre-made environment for proof of concept
 
 **Simulation Environment:**
 Modified TurtleBot3 house world with closed environment - the original door opening has been sealed with a wall to create a fully enclosed space. This ensures the robot can build a complete map without boundary issues and provides a realistic indoor setting with furniture and obstacles at appropriate scale for the robot's camera height.
@@ -38,16 +39,16 @@ Modified TurtleBot3 house world with closed environment - the original door open
 - **Nav2** - Navigation framework with path planning and control
 - **slam_toolbox** - 2D LiDAR SLAM for geometric mapping
 - **m-explore-ros2** - Frontier-based autonomous exploration
-- **custom pacakges** - main nodes and logic to pull things together
+- **custom pacakges** - main nodes and logic to pull things together (see below)
 
-**vision_pkg** - Object detection and 3D position estimation
+**(custom) - vision_pkg** - Object detection and 3D position estimation
 - Subscribes to RGB, depth, and camera info topics
 - Runs YOLOv10 inference with GPU acceleration
 - Converts 2D bounding boxes to 3D map coordinates using depth + camera intrinsics + TF
 - Publishes `DetectionArray` messages containing detected objects with positions
 - Provides annotated image visualization with bounding boxes
 
-**semantic_planner_pkg** - Semantic map maintenance and navigation interface
+**(custom) - semantic_planner_pkg** - Semantic map maintenance and navigation interface
 - Subscribes to detection arrays and maintains persistent semantic map
 - Performs spatial deduplication (distance threshold) to prevent duplicate object entries
 - Filters detections by confidence threshold
@@ -57,9 +58,9 @@ Modified TurtleBot3 house world with closed environment - the original door open
 
 **Perception:**
 - **YOLOv10** - Real-time object detection
+- **PyTorch** with CUDA - GPU-accelerated inference
 - **OpenCV** - Image processing and coordinate transforms
 - **cv_bridge** - ROS-OpenCV integration
-- **PyTorch** with CUDA - GPU-accelerated inference
 
 ## Semantic Map Structure
 The semantic layer stores detected objects with:
@@ -149,18 +150,18 @@ This brings up:
 
 **Configuration Files:**
 Parameters are managed through YAML files:
-- **Nav2, SLAM, Semantic Planner:** `vehicle_bringup/config/*.yaml`
+- **Nav2, SLAM, Semantic Planner, RViz:** `vehicle_bringup/config/*.yaml` and `vehicle_bringup/config/*.rviz`
 - **explore_lite:** `m-explore-ros2/explore/config/params.yaml`
 
 **RViz Settings:**
-Load saved RViz configuration to view all displays (map, camera feeds, semantic markers, paths).
+Load saved RViz configuration to view all displays (map, camera feeds, annotated feed, semantic markers, paths, etc.)
 
 ### Building the Map
 
 **Option 1: Autonomous Exploration**
 Launch explore_lite for frontier-based autonomous mapping:
 ```bash
-ros2 launch explore_lite explore.launch.py use_sim_time:=true
+ros2 launch explore_lite explore.launch.py use_sim_time:=true      # Run in separate terminal
 ```
 
 The robot autonomously explores and builds the map.
@@ -173,9 +174,9 @@ The robot autonomously explores and builds the map.
 **Option 2: Manual Control**
 Drive the robot manually using keyboard:
 ```bash
-ros2 run teleop_twist_keyboard teleop_twist_keyboard
+ros2 run teleop_twist_keyboard teleop_twist_keyboard      # Run in separate terminal
 ```
-or simply click on the 2D Goal Pose button in Rviz and then a space on the map to move the robot there. 
+or simply click on the 2D Goal Pose button in Rviz and then a space on the map to move the robot there (easiest method to test)
 <div align="center">
 <img src="images/manual_mapping.gif" width="600" />
 <p><i>Manual mapping with 2DGoalPose through Rviz</i></p>
@@ -187,7 +188,7 @@ or simply click on the 2D Goal Pose button in Rviz and then a space on the map t
 </div>
 
 ### Navigation Commands
-Once mapping is complete, send semantic navigation commands:
+Once mapping is complete or as objects have been detected and stored, send semantic navigation commands:
 ```bash
 # Navigate to detected objects
 ros2 topic pub /navigation_command std_msgs/String "data: 'go to chair'" --once
@@ -199,10 +200,10 @@ If multiple instances of an object exist, the robot navigates to the closest one
 
 ### RViz Visualization
 RViz displays:
-- **Map** - 2D occupancy grid from SLAM
+- **Map** - 2D occupancy grid with cost map from SLAM
 - **Robot Model** - TF tree and sensor frames
-- **Camera Feeds** - Raw and annotated images with detections
-- **Semantic Markers** - Labeled markers at object positions
+- **Camera Feeds** - Raw and annotated images with detections (rgb and depth maps)
+- **Semantic Markers** - Labeled array markers at object positions in saved semantic map and current visible objects
 - **Navigation** - Global and local paths from Nav2
 
 ## Troubleshooting
@@ -232,26 +233,26 @@ ros2 run tf2_tools view_frames
 ## Future Extensions
 
 **Short-term:**
-- [ ] Complete semantic_planner_pkg command parsing and Nav2 integration
+- [ ] Create [MBOT](https://mbot.robotics.umich.edu/docs/hardware/classic/building/) URDF for better visuals and recreatable hardware integration
+- [ ] Swap out vehicle for more realistic car-based model and driving mechanics to simulate an autonomous car as a separate test case
 - [ ] Confidence and recency-based object filtering
 - [ ] Save/load semantic maps for persistent memory across sessions
 
 **Medium-term:**
-- [ ] Periodic 360° rotations for complete semantic coverage
-- [ ] Object tracking with timestamp-based expiration
+- [ ] Periodic 360° rotations for complete semantic coverage (rgbd based, with existing LiDAR SLAM)
+- [ ] Learning based method for depth-aware object segmentation (through rgbd or lidar) for accurate 3D positioning in semantic map. Current limitation is its based on bounding box center for proof of concept
 - [ ] Multi-goal task planning
-- [ ] VLM integration for open-vocabulary queries
+- [ ] VLM integration for open-vocabulary queries (extend current natural language input)
 
 **Long-term:**
-- [ ] Visual SLAM fusion (RTAB-Map + LiDAR)
-- [ ] Pan-tilt camera mount for active perception
-- [ ] NeRF/Gaussian Splatting for photorealistic simulation
+- [ ] New/custom city environment for true autonomous vehicle simulation (road, traffic lights, cars, signs, etc.)
+- [ ] Visual SLAM fusion (ex: RTAB-Map + LiDAR)
+- [ ] Multiple cameras for detection
+- [ ] NeRF/Gaussian Splatting for photorealistic and custom simulation environments
 - [ ] RL-based local planner
 
 ## Acknowledgements
-- **Ultralytics** for YOLOv10 and comprehensive documentation
-- **Nav2** team for robust ROS2 navigation framework
-- **slam_toolbox** by Steve Macenski
+- **Nav2** for ROS2 navigation framework
+- **slam_toolbox**
 - **m-explore-ros2** (robo-friends) for autonomous exploration
-- **ROBOTIS** for TurtleBot3 simulation models
-- **ROS2 community** for extensive tutorials and support
+- **Ultralytics** for YOLOv10 
