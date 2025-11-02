@@ -14,5 +14,9 @@
         <arg name="params_file" value="$(find-pkg-share vehicle_bringup)/config/nav2_params.yaml"/>
     </include>
 
+    <!-- RViz -->
+    <node pkg="rviz2" exec="rviz2" name="rviz2" output="screen"
+          args="-d $(find-pkg-share vehicle_bringup)/config/slam_ros2_viz.rviz"/>
+
 </launch>
 
